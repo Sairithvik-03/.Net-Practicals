@@ -1,66 +1,131 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-class Student
-{
-    // Private Data Members
-    private int studentId;
-    private string studentName;
-    private int age;
-    private string course;
 
-    // Constructor
-    public Student(int id, string name, int studentAge, string studentCourse)
+namespace EmployeePayroll
+{
+    // Interface
+    interface IPayroll
     {
-        studentId = id;
-        studentName = name;
-        age = studentAge;
-        course = studentCourse;
+        void CalculateSalary();
     }
 
-    // Method to Display Student Details
-    public void DisplayDetails()
+    // Base Class
+    class Employee
     {
-        Console.WriteLine("\n Student Admission Details");
-        Console.WriteLine("Student ID   : " + studentId);
-        Console.WriteLine("Student Name : " + studentName);
-        Console.WriteLine("Age          : " + age);
-        Console.WriteLine("Course       : " + course);
-    }
-}
+        public int EmpId;
+        public string Name;
+        public double BasicSalary;
+        public int Leaves;
 
-
-class Program
-{
-    static int ReadInt(string prompt)
-    {
-        int value;
-        while (true)
+        public Employee()
         {
-            Console.Write(prompt);
-            string input = Console.ReadLine();
-            if (int.TryParse(input, out value))
-                return value;
-            Console.WriteLine("Invalid input. Please enter a valid integer.");
+            Console.WriteLine("=================================");
+            Console.WriteLine(" Employee Payroll Management");
+            Console.WriteLine("=================================");
+        }
+
+        public void AcceptDetails()
+        {
+            Console.Write("Enter Employee ID : ");
+            EmpId = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Enter Employee Name : ");
+            Name = Console.ReadLine();
+
+            Console.Write("Enter Basic Salary : ");
+            BasicSalary = Convert.ToDouble(Console.ReadLine());
+
+            Console.Write("Enter Leaves Taken : ");
+            Leaves = Convert.ToInt32(Console.ReadLine());
+        }
+
+        public void DisplayDetails()
+        {
+            Console.WriteLine("\nEmployee ID : " + EmpId);
+            Console.WriteLine("Employee Name : " + Name);
+            Console.WriteLine("Basic Salary : " + BasicSalary);
+            Console.WriteLine("Leaves Taken : " + Leaves);
         }
     }
 
-    static void Main(string[] args)
+    // Full-Time Employee
+    class FullTimeEmployee : Employee, IPayroll
     {
-        Console.WriteLine("Student Admission Management");
+        public void CalculateSalary()
+        {
+            double hra = BasicSalary * 0.40;
+            double da = BasicSalary * 0.20;
+            double pf = BasicSalary * 0.12;
 
-        int id = ReadInt("Enter Student ID: ");
-        Console.Write("Enter Student Name: ");
-        string name = Console.ReadLine();
-        int age = ReadInt("Enter Age: ");
-        Console.Write("Enter Course: ");
-        string course = Console.ReadLine();
+            double deduction = 0;
 
-        Student s1 = new Student(id, name, age, course);
-        s1.DisplayDetails();
+            // First 2 leaves are free
+            if (Leaves > 2)
+            {
+                deduction = (Leaves - 2) * 500;
+            }
 
-        Console.WriteLine("\nAdmission Successful!");
+            double netSalary = (BasicSalary + hra + da) - pf - deduction;
+
+            Console.WriteLine("Employee Type : Full-Time");
+            Console.WriteLine("Leave Deduction : " + deduction);
+            Console.WriteLine("Net Salary : " + netSalary);
+        }
+    }
+
+    // Part-Time Employee
+    class PartTimeEmployee : Employee, IPayroll
+    {
+        public void CalculateSalary()
+        {
+            double allowance = BasicSalary * 0.15;
+
+            double deduction = 0;
+
+            // One leave is free
+            if (Leaves > 1)
+            {
+                deduction = (Leaves - 1) * 300;
+            }
+
+            double netSalary = BasicSalary + allowance - deduction;
+
+            Console.WriteLine("Employee Type : Part-Time");
+            Console.WriteLine("Leave Deduction : " + deduction);
+            Console.WriteLine("Net Salary : " + netSalary);
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            IPayroll emp;
+
+            Console.WriteLine("1. Full-Time Employee");
+            Console.WriteLine("2. Part-Time Employee");
+            Console.Write("Enter Choice : ");
+            int choice = Convert.ToInt32(Console.ReadLine());
+
+            if (choice == 1)
+            {
+                FullTimeEmployee ft = new FullTimeEmployee();
+                ft.AcceptDetails();
+                ft.DisplayDetails();
+
+                emp = ft;     // Polymorphism
+                emp.CalculateSalary();
+            }
+            else
+            {
+                PartTimeEmployee pt = new PartTimeEmployee();
+                pt.AcceptDetails();
+                pt.DisplayDetails();
+
+                emp = pt;     // Polymorphism
+                emp.CalculateSalary();
+            }
+
+            Console.ReadLine();
+        }
     }
 }
